@@ -1,5 +1,10 @@
+import 'package:expense_tracker/controller/database_controller.dart';
+import 'package:expense_tracker/controller/dialog_controller.dart';
+import 'package:expense_tracker/model/transaction_model.dart';
 import 'package:expense_tracker/utils/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,10 +14,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _dialogController = Get.find<DialogController>();
+  final _databaseController = Get.find<DatabaseController>();
+
+  final TextEditingController _amountController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
+
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -92,19 +110,25 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 62.0),
                 child: SizedBox(
-                  child: ListView.builder(
-                    itemCount: 12,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: ListTile(
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [Text('2/05/25'), Text('400')],
-                          ),
-                        ),
+                  child: GetBuilder<DatabaseController>(
+                    builder: (context) {
+                      final List<TransactionModel> transactions = _databaseController.history();
+                      return ListView.builder(
+                        itemCount: transactions.length,
+                        itemBuilder: (context, index) {
+                          TransactionModel model = transactions[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: ListTile(
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [Text(DateFormat('MMMM d').format(model.date)), Text('${model.amount}')],
+                              ),
+                            ),
+                          );
+                        },
                       );
-                    },
+                    }
                   ),
                 ),
               ),
@@ -137,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
             Text(
-              'January',
+              DateFormat('MMMM d').format(_dialogController.getDate),
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ],
@@ -198,38 +222,85 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (BuildContext context){
       return AlertDialog(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            TextFormField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
-            DropdownButton(
-              value: 1,
-                iconDisabledColor: AppColor.balanceColor,
-                iconEnabledColor: AppColor.balanceColor,
-                elevation: 14,
-                items: [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text(
-                      "Income",
-                      style: TextStyle(color: AppColor.backgroundColor),
+        title: GetBuilder<DialogController>(
+          builder: (context) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              spacing: 10,
+              children: [
+                Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: TextFormField(
+                    controller: _amountController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(onPressed:()=> _dialogController.selectDate(ctx), icon: Icon(Icons.date_range_rounded))
                     ),
+                    validator: (value){
+                      if(value==null || value.isEmpty){
+                        return 'Enter amount';
+                      }
+                      return null;
+                    },
                   ),
-                  DropdownMenuItem(
-                    value: 2,
-                    child: Text(
-                      "Expense",
-                      style: TextStyle(color: AppColor.backgroundColor),
+                ),
+                Text(DateFormat('MMMM d').format(_dialogController.getDate),style: TextStyle(fontSize: 12),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      height: 35,
+                      width: 110,
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade100,
+                        borderRadius: BorderRadius.circular(24.0)
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Row(
+                          children: [
+                            Radio(
+                                value: 'income',
+                                groupValue: _dialogController.getRadioValue,
+                                onChanged: (value){
+                                  _dialogController.setRadioValue = value;
+                                }
+                            ),
+                            Text('Income',style: TextStyle(fontSize: 12),)
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-                onChanged: (value){}
-            ),
-          ],
+                    Container(
+                      height: 35,
+                      width: 110,
+                      decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(24.0)
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Radio(
+                                value: 'expense',
+                                groupValue: _dialogController.getRadioValue,
+                                onChanged: (value){
+                                  _dialogController.setRadioValue = value;
+                                }
+                            ),
+                            Text('Expense',style: TextStyle(fontSize: 12))
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            );
+          }
         ),
         actions: [
           TextButton(
@@ -240,13 +311,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           TextButton(
               onPressed: (){
-                Navigator.pop(context);
+                _onTapDone();
               },
               child: Text('Done')
           ),
         ],
       );
     });
+  }
+
+  void _onTapDone(){
+    if(_formKey.currentState!.validate()){
+      double amount = double.parse(_amountController.text.trim());
+      String type = _dialogController.getRadioValue;
+      DateTime date = _dialogController.getDate;
+      _databaseController.addTransaction(type, amount, date);
+    }
+    _amountController.clear();
+    Navigator.pop(context);
   }
 
 }
