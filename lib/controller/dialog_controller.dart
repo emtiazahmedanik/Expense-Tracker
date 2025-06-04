@@ -14,6 +14,9 @@ class DialogController extends GetxController {
   DateTime _selectedDate = DateTime.now();
 
   get getDate => _selectedDate;
+  void setDate(){
+    _selectedDate = DateTime.now();
+  }
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(

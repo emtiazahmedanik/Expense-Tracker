@@ -1,5 +1,6 @@
 import 'package:expense_tracker/controller/database_controller.dart';
 import 'package:expense_tracker/controller/dialog_controller.dart';
+import 'package:expense_tracker/controller/transaction_filtering_controller.dart';
 import 'package:expense_tracker/model/transaction_model.dart';
 import 'package:expense_tracker/utils/app_color.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +17,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _dialogController = Get.find<DialogController>();
   final _databaseController = Get.find<DatabaseController>();
+  final _transactionFilteringController = Get.find<TransactionFilteringController>();
 
   final TextEditingController _amountController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  String type = '';
   @override
   void initState() {
     super.initState();
@@ -117,12 +120,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemCount: transactions.length,
                         itemBuilder: (context, index) {
                           TransactionModel model = transactions[index];
+                          type = model.type;
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: ListTile(
                               title: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [Text(DateFormat('MMMM d').format(model.date)), Text('${model.amount}')],
+                                children: [
+                                  Text(DateFormat('MMMM d').format(model.date)),
+                                  Text('${addPlusMinus()}${model.amount.toStringAsFixed(0)}',style: historyStyle(),)
+                                ],
                               ),
                             ),
                           );
@@ -166,7 +173,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        Text('৳ 2000', style: TextStyle(color: Colors.white, fontSize: 30)),
+        GetBuilder<TransactionFilteringController>(
+          builder: (context) {
+            return Text('৳ ${_transactionFilteringController.getBalance}', style: TextStyle(color: Colors.white, fontSize: 30));
+          }
+        ),
         SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -205,12 +216,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('৳ 2000', style: TextStyle(color: Colors.white, fontSize: 20)),
-            Text('৳ 2000', style: TextStyle(color: Colors.white, fontSize: 20)),
-          ],
+        GetBuilder<TransactionFilteringController>(
+          builder: (context) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('৳ ${_transactionFilteringController.getIncome}', style: TextStyle(color: Colors.white, fontSize: 20)),
+                Text('৳ ${_transactionFilteringController.getExpense}', style: TextStyle(color: Colors.white, fontSize: 20)),
+              ],
+            );
+          }
         ),
       ],
     );
@@ -305,6 +320,8 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
               onPressed: (){
+                _amountController.clear();
+                _dialogController.setDate();
                 Navigator.pop(context);
               },
               child: Text('Cancel',style: TextStyle(color: Colors.red),)
@@ -326,9 +343,22 @@ class _HomeScreenState extends State<HomeScreen> {
       String type = _dialogController.getRadioValue;
       DateTime date = _dialogController.getDate;
       _databaseController.addTransaction(type, amount, date);
+      _dialogController.setDate();
     }
     _amountController.clear();
+    _transactionFilteringController.updateAll();
     Navigator.pop(context);
+  }
+
+  TextStyle historyStyle(){
+    return type=='income'
+        ?TextStyle(color: Colors.green)
+        :TextStyle(color: Colors.red);
+  }
+  String addPlusMinus(){
+    return type=='income'
+        ?'+'
+        :'-';
   }
 
 }
