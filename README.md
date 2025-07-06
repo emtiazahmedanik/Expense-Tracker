@@ -3,19 +3,20 @@
 I created this project to solve my personal problem. My father sent me taka every week once or
 twice. So it is very difficult to track how much money I received in a month. So I made this project
 in a simple way so I can add money received from father.
-🔧 Key Features
-📊 Add Expenses
-🧾 Check transaction history
-📅 Monthly summaries
-🌐 Multi-language support with GetX localization
-⚡ Reactive state management using GetX
+<br/>
+🔧 Key Features <br/>
+📊 Add Expenses <br/>
+🧾 Check transaction history <br/>
+📅 Monthly summaries <br/>
+🌐 Multi-language support with GetX localization <br/>
+⚡ Reactive state management using GetX <br/>
 🎨 Clean and responsive UI
-
-🛠️ Tech Stack
-Flutter - UI toolkit for crafting natively compiled apps
-GetX - Lightweight and powerful state management and localization solution
-Hive - For local persistent storage 
-Shared Preference - For local storage
+<br/>
+🛠️ Tech Stack <br/>
+Flutter - UI toolkit for crafting natively compiled apps <br/>
+GetX - Lightweight and powerful state management and localization solution <br/>
+Hive - For local persistent storage <br/>
+Shared Preference - For local storage <br/>
 ## Getting Started
 
 This project is a starting point for a Flutter application.
