@@ -3,7 +3,7 @@
 I created this project to solve my personal problem. My father sent me taka every week once or
 twice. So it is very difficult to track how much money I received in a month. So I made this project
 in a simple way so I can add money received from father.
-<br/>
+<br/><br/>
 🔧 Key Features <br/>
 📊 Add Expenses <br/>
 🧾 Check transaction history <br/>
@@ -11,7 +11,7 @@ in a simple way so I can add money received from father.
 🌐 Multi-language support with GetX localization <br/>
 ⚡ Reactive state management using GetX <br/>
 🎨 Clean and responsive UI
-<br/>
+<br/><br/>
 🛠️ Tech Stack <br/>
 Flutter - UI toolkit for crafting natively compiled apps <br/>
 GetX - Lightweight and powerful state management and localization solution <br/>
