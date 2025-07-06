@@ -17,6 +17,9 @@ Flutter - UI toolkit for crafting natively compiled apps <br/>
 GetX - Lightweight and powerful state management and localization solution <br/>
 Hive - For local persistent storage <br/>
 Shared Preference - For local storage <br/>
+
+https://github.com/user-attachments/assets/c19c96c1-f108-4197-8160-81632543e89c
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
